@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>投機型買股雷達 - 視覺化看板</title>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: radial-gradient(circle at top right, #1a202c, #0d1117);
+            color: #e2e8f0;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(66, 153, 225, 0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(66, 153, 225, 0.3);
+        }
+
+        .score-glow {
+            text-shadow: 0 0 15px rgba(66, 153, 225, 0.8);
+        }
+
+        .sidebar {
+            background: rgba(0, 0, 0, 0.3);
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="w-80 sidebar p-8 border-r border-gray-800">
+            <h1
+                class="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                投機獵手 V2.0
+            </h1>
+            <p class="text-xs text-gray-500 mb-10 tracking-widest uppercase">Speculative Analysis</p>
+
+            <nav class="space-y-4" id="target-list">
+                <div class="text-gray-600">載入中數據...</div>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-10 overflow-y-auto h-screen">
+            <div id="welcome-screen" class="h-full flex flex-col justify-center items-center text-center">
+                <div
+                    class="w-24 h-24 mb-6 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                    <svg class="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+                <h2 class="text-4xl font-semibold mb-4">請選擇一個標的</h2>
+                <p class="text-gray-400 max-w-md">點擊左側名單查看 AI 評分細節、新聞題材以及盤中即時動能。</p>
+            </div>
+
+            <div id="detail-view" class="hidden space-y-8">
+                <header class="flex justify-between items-start mb-6">
+                    <div>
+                        <p id="detail-symbol" class="text-blue-400 font-mono text-sm tracking-widest mb-1"></p>
+                        <div class="flex items-center gap-4">
+                            <h2 id="detail-name" class="text-4xl font-bold"></h2>
+                            <a id="cnyes-link" href="#" target="_blank" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 transition-all group shadow-sm">
+                                <img src="https://news.cnyes.com/favicon.ico" alt="cnyes" class="w-4 h-4 rounded-full group-hover:scale-110 transition-transform" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2965/2965306.png'">
+                                <span class="text-[10px] text-blue-300 font-bold tracking-wider">鉅亨分析</span>
+                            </a>
+                            <span id="refresh-timer" class="text-[10px] text-green-400 font-mono border border-green-500/30 px-2 py-0.5 rounded-full animate-pulse transition-opacity">5S 後靜默刷新</span>
+                        </div>
+                        <div class="flex gap-4 mt-2">
+                            <div class="glass-card px-3 py-1 text-xs">
+                                <span class="text-gray-500">主力態勢:</span> <span id="inst-foreign" class="text-white">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500 uppercase">AI Speculation Score</p>
+                        <div id="detail-score" class="text-6xl font-bold score-glow text-blue-400">00</div>
+                    </div>
+                </header>
+
+                <div class="grid grid-cols-3 gap-6">
+                    <main class="col-span-2">
+                        <div class="flex justify-between items-end mb-4">
+                            <div class="flex gap-4">
+                                <button onclick="switchChartView('history')" id="btn-history" class="px-4 py-2 rounded-lg bg-blue-500/20 border border-blue-500/50 text-blue-400 text-sm font-bold transition-all">14 天趨勢</button>
+                                <button onclick="switchChartView('intraday')" id="btn-intraday" class="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 text-sm font-bold hover:bg-white/10 transition-all">當日分時(量價)</button>
+                            </div>
+
+                            <!-- 即時報價面板 -->
+                            <div id="quote-panel" class="flex gap-4 bg-indigo-500/10 backdrop-blur-md rounded-xl px-4 py-2 border border-indigo-500/30 hidden">
+                                <div class="text-center px-2">
+                                    <p class="text-[11px] text-gray-400 uppercase">昨收</p>
+                                    <p id="q-prev-close" class="text-xl font-bold text-gray-300 mt-1">--</p>
+                                </div>
+                                <div class="w-px h-10 bg-white/20 self-center"></div>
+                                <div class="text-center px-2">
+                                    <p class="text-[11px] text-gray-400 uppercase">開盤</p>
+                                    <p id="q-open" class="text-xl font-bold text-yellow-500 mt-1">--</p>
+                                </div>
+                                <div class="w-px h-10 bg-white/20 self-center"></div>
+                                <div class="text-center px-2">
+                                    <p class="text-[11px] text-gray-400 uppercase">最高</p>
+                                    <p id="q-high" class="text-xl font-bold text-red-500 mt-1">--</p>
+                                </div>
+                                <div class="w-px h-10 bg-white/20 self-center"></div>
+                                <div class="text-center px-2">
+                                    <p class="text-[11px] text-gray-400 uppercase">最低</p>
+                                    <p id="q-low" class="text-xl font-bold text-green-500 mt-1">--</p>
+                                </div>
+                                <div class="w-px h-10 bg-white/20 self-center"></div>
+                                <div class="text-center bg-white/5 px-4 py-1 rounded-lg flex flex-col justify-center border border-white/10">
+                                    <p class="text-[11px] text-gray-400 uppercase">漲跌</p>
+                                    <p id="q-change" class="text-xl font-bold mt-1">--</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="chart-container" class="glass-card p-4 mb-6" style="height: 380px;">
+                            <div id="price-chart"></div>
+                        </div>
+
+                        <div id="intraday-risk-box" class="glass-card p-4 mb-6 border-l-4 border-red-500 bg-red-500/5 hidden">
+                            <div class="flex justify-between items-center">
+                                <h4 class="text-sm font-bold text-red-500">⚠️ 盤中即時風險預警</h4>
+                                <span id="intraday-momentum" class="text-xs bg-red-500/20 px-2 py-0.5 rounded">分析中...</span>
+                            </div>
+                            <p id="intraday-risk-text" class="text-xs text-gray-300 mt-2 italic"></p>
+                        </div>
+
+                        <div class="mb-6">
+                            <h3 class="text-sm font-bold text-gray-400 mb-3 flex items-center gap-2">
+                                <span class="w-1 h-4 bg-blue-500 rounded"></span> 近三日歷史數據區
+                            </h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm border-collapse">
+                                    <thead>
+                                        <tr class="text-gray-500 border-b border-white/10 uppercase font-mono">
+                                            <th class="py-2">日期</th>
+                                            <th class="py-2">收盤</th>
+                                            <th class="py-2">漲跌/幅</th>
+                                            <th class="py-2">成交量</th>
+                                            <th class="py-2">成交值(億)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="three-day-body" class="font-mono"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </main>
+
+                    <aside class="flex flex-col gap-6">
+                        <div class="glass-card p-6 border-l-4 border-indigo-500 bg-indigo-500/5 mb-6">
+                            <h3 class="font-bold mb-4 text-indigo-400 font-mono">🤖 AI 智能研報 <span class="text-xs text-indigo-300/50 ml-2">(鉅亨即時數據)</span></h3>
+                            <p id="detail-ai-insight" class="text-sm text-indigo-100 leading-relaxed tracking-wide"></p>
+                        </div>
+                        
+                        <div class="glass-card p-6 border-l-4 border-blue-500/50 mb-6">
+                            <h3 class="font-bold mb-4 text-blue-300 text-sm">📡 原始媒體風聲</h3>
+                            <p id="detail-analysis" class="text-xs text-gray-400 leading-relaxed"></p>
+                        </div>
+
+                        <div id="ai-strategy" class="glass-card p-6 border-l-4 border-green-500 bg-green-500/5">
+                            <h3 class="font-bold mb-4 text-green-400">⚡ 獵首決策牆</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-gray-400">今日策略:</span>
+                                    <span id="strategy-today" class="font-bold text-green-400">--</span>
+                                </div>
+                                <div class="flex justify-between text-xs">
+                                    <span class="text-gray-400">明日預期:</span>
+                                    <span id="strategy-tomorrow" class="font-bold text-blue-400">--</span>
+                                </div>
+                                <hr class="border-white/10">
+                                <div class="grid grid-cols-2 gap-2 text-center">
+                                    <div class="bg-blue-500/10 p-2 rounded">
+                                        <p class="text-[10px] text-gray-500 uppercase">壓力區</p>
+                                        <p id="price-resistance" class="text-blue-400 font-bold">--</p>
+                                    </div>
+                                    <div class="bg-red-500/10 p-2 rounded border border-red-500/30">
+                                        <p class="text-[10px] text-red-500 uppercase">絕對止損</p>
+                                        <p id="price-stoploss" class="text-red-400 font-bold">--</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="risk-alert" class="glass-card p-6 border-l-4 border-yellow-500 hidden bg-yellow-500/5">
+                            <h3 class="font-bold mb-2 text-yellow-500">⚠️ 風險警告</h3>
+                            <div id="risk-content" class="text-xs text-yellow-200/80 leading-relaxed italic"></div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dashboard_data.js"></script>
+    <script>
+        let stockData = [];
+        let activeSymbol = null;
+        let currentView = 'history';
+
+        async function loadData() {
+            try {
+                if (window.STOCK_DATA) {
+                    stockData = window.STOCK_DATA;
+                    renderList();
+                    activeSymbol = localStorage.getItem('activeSymbol');
+                    currentView = localStorage.getItem('currentView') || 'history';
+                    
+                    if (activeSymbol) {
+                        const index = stockData.findIndex(s => s.symbol === activeSymbol);
+                        if (index !== -1) showDetail(index);
+                    }
+                }
+            } catch (e) {
+                console.error("Load failed", e);
+            }
+        }
+
+        function renderList() {
+            const container = document.getElementById('target-list');
+            container.innerHTML = '';
+            stockData.forEach((s, idx) => {
+                const div = document.createElement('div');
+                div.className = `glass-card p-4 cursor-pointer hover:bg-white/5 mb-4 ${activeSymbol === s.symbol ? 'border-blue-500 border-2' : ''}`;
+                div.onclick = () => showDetail(idx);
+                div.innerHTML = `<div class="flex justify-between"><b>${s.name.replace('台股','')}</b><span class="text-blue-400">${s.score}分</span></div>`;
+                container.appendChild(div);
+            });
+        }
+
+        async function loadData() {
+            try {
+                if (window.STOCK_DATA) {
+                    stockData = window.STOCK_DATA;
+                    renderList();
+                    
+                    activeSymbol = localStorage.getItem('activeSymbol');
+                    currentView = localStorage.getItem('currentView') || 'history';
+                    
+                    if (activeSymbol) {
+                        const index = stockData.findIndex(s => s.symbol === activeSymbol);
+                        if (index !== -1) {
+                            // 這裡調用一個特殊的更新函數，而不是完整的 showDetail，避免 UI 抖動
+                            updateUIDisplay(index);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Load failed", e);
+            }
+        }
+
+        function renderList() {
+            const container = document.getElementById('target-list');
+            container.innerHTML = '';
+            stockData.forEach((s, idx) => {
+                const div = document.createElement('div');
+                div.className = `glass-card p-4 cursor-pointer hover:bg-white/5 mb-4 ${activeSymbol === s.symbol ? 'border-sky-500 border-2 bg-sky-500/10 shadow-[0_0_15px_rgba(14,165,233,0.3)]' : ''}`;
+                div.onclick = () => showDetail(idx);
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div class="flex flex-col">
+                            <b>${s.name.replace('台股','')} <span class="text-sm font-normal text-gray-400 ml-1">(${s.symbol})</span></b>
+                            ${s.industry ? `<span class="text-[11px] text-indigo-300/80 mt-1 border border-indigo-400/30 rounded px-1 self-start inline-block">${s.industry}</span>` : ''}
+                        </div>
+                        <span class="text-sky-400 text-2xl font-bold">${s.score}<span class="text-xs font-normal text-gray-500 ml-1">分</span></span>
+                    </div>`;
+                container.appendChild(div);
+            });
+        }
+
+        // 核心更新邏輯：只更新數值與圖表資料，不移動 UI
+        function updateUIDisplay(idx) {
+            const s = stockData[idx];
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('detail-view').classList.remove('hidden');
+            document.getElementById('detail-name').innerText = `${s.name} (${s.symbol})`;
+            document.getElementById('cnyes-link').href = `https://www.cnyes.com/twstock/${s.symbol}`;
+            document.getElementById('detail-score').innerText = s.score;
+            document.getElementById('detail-analysis').innerText = s.analysis;
+            
+            const insightEl = document.getElementById('detail-ai-insight');
+            if (insightEl) insightEl.innerText = s.ai_insight || '--';
+            
+            document.getElementById('inst-foreign').innerText = s.foreign_flow;
+            document.getElementById('strategy-today').innerText = s.strategy_today;
+            document.getElementById('strategy-tomorrow').innerText = s.strategy_tomorrow;
+            
+            // 更新今日概況
+            if (s.quote_info) {
+                document.getElementById('quote-panel').classList.remove('hidden');
+                document.getElementById('q-prev-close').innerText = s.quote_info.prev_close || "--";
+                document.getElementById('q-open').innerText = s.quote_info.open || "--";
+                document.getElementById('q-high').innerText = s.quote_info.high || "--";
+                document.getElementById('q-low').innerText = s.quote_info.low || "--";
+
+                const qChangeEl = document.getElementById('q-change');
+                if (s.quote_info.prev_close && s.quote_info.prev_close !== "--" && s.intraday && s.intraday.length > 0) {
+                    const latestClose = s.intraday[0].close; // 盤中數列目前設定最新的在 [0] 前面，因為 cache. (若非反向，則 length-1) 
+                    // 根據 renderChart 可以知道 intraday 時: timeline 抓對應時間
+                    // 比較保險的做法是找第一個出現非 null 的 close
+                    let closeVal = s.intraday[0].close; 
+                    const diff = closeVal - parseFloat(s.quote_info.prev_close);
+                    const pct = (diff / parseFloat(s.quote_info.prev_close)) * 100;
+                    const diffStr = diff > 0 ? `+${diff.toFixed(2)}` : diff.toFixed(2);
+                    const pctStr = `${pct > 0 ? '+' : ''}${pct.toFixed(2)}%`;
+                    qChangeEl.innerHTML = `${diffStr} <span class="text-xs font-normal">(${pctStr})</span>`;
+                    qChangeEl.className = `text-xl font-bold mt-1 ${diff > 0 ? 'text-red-500' : (diff < 0 ? 'text-green-500' : 'text-gray-300')}`;
+                } else {
+                    qChangeEl.innerText = "--";
+                    qChangeEl.className = "text-xl font-bold text-gray-500 mt-1";
+                }
+            } else {
+                document.getElementById('quote-panel').classList.add('hidden');
+            }
+
+            // 強制小數點兩位
+            document.getElementById('price-resistance').innerText = typeof s.resistance === 'number' ? s.resistance.toFixed(2) : s.resistance;
+            document.getElementById('price-stoploss').innerText = typeof s.stop_loss === 'number' ? s.stop_loss.toFixed(2) : s.stop_loss;
+
+            const rBox = document.getElementById('risk-alert');
+            if(s.risk_warning) { 
+                rBox.classList.remove('hidden'); 
+                document.getElementById('risk-content').innerText = s.risk_warning; 
+            } else rBox.classList.add('hidden');
+
+            const iBox = document.getElementById('intraday-risk-box');
+            if(s.intraday_risk) { 
+                iBox.classList.remove('hidden'); 
+                document.getElementById('intraday-risk-text').innerText = s.intraday_risk;
+                document.getElementById('intraday-momentum').innerText = s.intraday_momentum;
+            } else iBox.classList.add('hidden');
+
+            renderThreeDayTable(s.history);
+            renderChart(currentView === 'history' ? s.history : s.intraday);
+            updateBtnStyles();
+        }
+
+        function showDetail(idx) {
+            const s = stockData[idx];
+            activeSymbol = s.symbol;
+            localStorage.setItem('activeSymbol', activeSymbol);
+            updateUIDisplay(idx);
+            renderList(); // 重繪列表展現選取效果
+        }
+
+        function switchChartView(v) {
+            currentView = v; localStorage.setItem('currentView', v);
+            const index = stockData.findIndex(st => st.symbol === activeSymbol);
+            if(index !== -1) updateUIDisplay(index);
+        }
+
+        function updateBtnStyles() {
+            const bh = document.getElementById('btn-history');
+            const bi = document.getElementById('btn-intraday');
+            bh.className = currentView === 'history' ? "px-4 py-2 rounded-lg bg-blue-500/20 border border-blue-500/50 text-blue-400 text-sm font-bold" : "px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 text-sm font-bold";
+            bi.className = currentView === 'intraday' ? "px-4 py-2 rounded-lg bg-blue-500/20 border border-blue-500/50 text-blue-400 text-sm font-bold" : "px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 text-sm font-bold";
+        }
+
+        function renderThreeDayTable(history) {
+            const tbody = document.getElementById('three-day-body');
+            tbody.innerHTML = ''; if(!history) return;
+            history.slice(0, 3).forEach((d, i) => {
+                const tr = document.createElement('tr'); tr.className = 'border-b border-white/5 last:border-0';
+                let cStr = "--", cCls = "text-gray-400";
+                if(i < history.length - 1) {
+                    const p = history[i+1].close; const diff = (d.close - p).toFixed(2);
+                    cStr = `${diff>0?'+':''}${diff} (${((diff/p)*100).toFixed(2)}%)`;
+                    cCls = diff > 0 ? 'text-red-400' : 'text-green-400';
+                }
+                tr.innerHTML = `<td class="py-3">${d.date}</td><td class="font-bold">${d.close.toFixed(2)}</td><td class="${cCls}">${cStr}</td><td>${(d.volume/1000).toFixed(0)}K</td><td class="text-blue-400">${(d.close*d.volume/100000000).toFixed(2)}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        let chart = null;
+        function renderChart(data) {
+            if (chart) chart.destroy();
+            if (!data || data.length === 0) return;
+
+            let finalPrices = [];
+            let finalVolumes = [];
+            let finalDates = [];
+
+            if (currentView === 'intraday') {
+                // 生成 09:00 - 13:30 的完整交易時間軸
+                const timeline = [];
+                for (let h = 9; h <= 13; h++) {
+                    for (let m = 0; m < 60; m++) {
+                        if (h === 13 && m > 30) break;
+                        const hh = h.toString().padStart(2, '0');
+                        const mm = m.toString().padStart(2, '0');
+                        timeline.push(`${hh}:${mm}`);
+                    }
+                }
+                
+                // 建立快速查詢 Map (避免每次 loop 都重複查找)
+                const dataMap = {};
+                data.forEach(item => { dataMap[item.date] = item; });
+                
+                finalDates = timeline;
+                finalPrices = timeline.map(t => dataMap[t] ? dataMap[t].close : null);
+                finalVolumes = timeline.map(t => dataMap[t] ? dataMap[t].volume : null);
+            } else {
+                // 14 天歷史數據
+                finalPrices = data.map(h => h.close).reverse();
+                finalVolumes = data.map(h => h.volume).reverse();
+                finalDates = data.map(h => h.date).reverse();
+            }
+
+            const options = {
+                series: [
+                    { name: '價格', type: 'area', data: finalPrices },
+                    { name: '成交量', type: 'column', data: finalVolumes }
+                ],
+                chart: { 
+                    height: 350, 
+                    type: 'line', 
+                    toolbar: { show: false }, 
+                    foreColor: '#718096', 
+                    animations: { enabled: false } 
+                },
+                stroke: { width: [3, 0], curve: 'smooth' },
+                colors: ['#4299e1', 'rgba(255, 255, 255, 0.1)'],
+                xaxis: { 
+                    categories: finalDates,
+                    tooltip: { enabled: true },
+                    labels: {
+                        formatter: function(val) {
+                            if (currentView === 'intraday' && val) {
+                                // 僅顯示整點與半點，如 09:00, 09:30, 10:00...
+                                return (val.endsWith(':00') || val.endsWith(':30')) ? val : '';
+                            }
+                            return val;
+                        }
+                    }
+                },
+                yaxis: [
+                    { 
+                        title: { text: "價格" },
+                        labels: { formatter: (v) => v ? v.toFixed(2) : '' }
+                    },
+                    { 
+                        opposite: true, 
+                        labels: { show: false } 
+                    }
+                ],
+                grid: { borderColor: '#2d3748', strokeDashArray: 4 },
+                tooltip: { 
+                    theme: 'dark', 
+                    shared: true,
+                    intersect: false, 
+                    y: { 
+                        formatter: function(val, { seriesIndex }) {
+                            if (typeof val === 'undefined' || val === null) return '--';
+                            return seriesIndex === 0 ? val.toFixed(2) : Math.round(val).toLocaleString();
+                        }
+                    } 
+                },
+                legend: { show: false }
+            };
+
+            chart = new ApexCharts(document.querySelector("#price-chart"), options);
+            chart.render();
+        }
+
+        // --- 靜默刷新核心系統 ---
+        let count = 5;
+        function silentRefresh() {
+            // 移除舊腳本並重新注入，強迫讀取最新 .js
+            const oldScript = document.querySelector('script[src*="dashboard_data.js"]');
+            if (oldScript) oldScript.remove();
+            
+            const newScript = document.createElement('script');
+            newScript.src = `dashboard_data.js?ts=${new Date().getTime()}`;
+            newScript.onload = () => {
+                loadData();
+                console.log("數據靜默刷新完成");
+            };
+            document.body.appendChild(newScript);
+        }
+        // 盤中過濾機制
+        function isMarketOpen() {
+            const now = new Date();
+            const h = now.getHours();
+            const m = now.getMinutes();
+            // 09:00 - 13:40
+            if (h === 13) return m <= 40;
+            return h >= 9 && h < 13;
+        }
+
+        setInterval(() => { 
+            const timerEl = document.getElementById('refresh-timer');
+            if (!isMarketOpen()) {
+                timerEl.classList.add('hidden'); // 關盤不顯示倒數計時
+                return; // 不刷新
+            } else {
+                timerEl.classList.remove('hidden');
+            }
+            
+            count--; 
+            timerEl.innerText = `${count}S 後靜默刷新`;
+            
+            if(count <= 0) {
+                count = 5;
+                silentRefresh();
+            }
+        }, 1000);        loadData();
+
+        loadData();
+    </script>
+</body>
+</html>
