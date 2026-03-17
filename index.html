@@ -48,7 +48,10 @@
                 class="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
                 投機獵手 V2.0
             </h1>
-            <p class="text-xs text-gray-500 mb-10 tracking-widest uppercase">Speculative Analysis</p>
+            <div class="text-xs text-gray-500 mb-10 tracking-widest uppercase">
+                SPECULATIVE ANALYSIS<br>
+                <span id="last-update" class="text-[10px] font-mono text-gray-400/80 normal-case"></span>
+            </div>
 
             <nav class="space-y-4" id="target-list">
                 <div class="text-gray-600">載入中數據...</div>
@@ -249,6 +252,10 @@
             try {
                 if (window.STOCK_DATA) {
                     stockData = window.STOCK_DATA;
+                    if (window.LAST_UPDATE) {
+                        const el = document.getElementById('last-update');
+                        if (el) el.innerText = `資料更新:${window.LAST_UPDATE}`;
+                    }
                     renderList();
                     
                     activeSymbol = localStorage.getItem('activeSymbol');
