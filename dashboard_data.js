@@ -1,3 +1,4 @@
+window.LAST_UPDATE = '2026/03/17 17:14';
 window.STOCK_DATA = [
     {
         "symbol": "2337",
