@@ -1,4 +1,4 @@
-window.LAST_UPDATE = '2026/03/17 17:18';
+window.LAST_UPDATE = '2026/03/17 17:19';
 window.STOCK_DATA = [
     {
         "symbol": "2330",
@@ -8,8 +8,8 @@ window.STOCK_DATA = [
         "analysis": "台積電第21次秒填息！漲30元至1875元 股利4/9入帳 - Yahoo股市",
         "ai_insight": "【智能點評】盤面情緒沸騰！受大盤或新聞「台積電第21次秒填息！漲30元...」激勵，短線量能放大，請留意追高風險與前高壓力。",
         "foreign_flow": "主力點火",
-        "strategy_today": "強勢鎖標",
-        "strategy_tomorrow": "持股待漲",
+        "strategy_today": "強勢填息",
+        "strategy_tomorrow": "順勢做多",
         "resistance": 2025.0,
         "stop_loss": 1776.5,
         "risk_warning": "【科學預警】新聞熱度已達心理巔峰，利多出盡機率高。",
@@ -1475,7 +1475,8 @@ window.STOCK_DATA = [
             "open": 1875.0,
             "high": 1880.0,
             "low": 1860.0
-        }
+        },
+        "ai_insight_text": "【AI 大師研報】上演秒填息經典秀，終場大漲站上1870。此為台股護國神山與GTC大會實質最大贏家，適合大資金右側順勢操作，長線保護短線。"
     },
     {
         "symbol": "3653",
@@ -1485,8 +1486,8 @@ window.STOCK_DATA = [
         "analysis": "《熱門族群》背板股開獎！GTC報喜 健策漲停、台達電衝高 - Yahoo股市",
         "ai_insight": "【智能點評】盤面情緒沸騰！受大盤或新聞「《熱門族群》背板股開獎！GTC...」激勵，短線量能放大，請留意追高風險與前高壓力。",
         "foreign_flow": "主力點火",
-        "strategy_today": "強勢鎖標",
-        "strategy_tomorrow": "持股待漲",
+        "strategy_today": "利多噴發",
+        "strategy_tomorrow": "逢高減碼",
         "resistance": 3725.0,
         "stop_loss": 3538.75,
         "risk_warning": "【科學預警】新聞熱度已達心理巔峰，利多出盡機率高。",
@@ -2257,7 +2258,8 @@ window.STOCK_DATA = [
             "open": 3520.0,
             "high": 3725.0,
             "low": 3500.0
-        }
+        },
+        "ai_insight_text": "【AI 大師研報】獲輝達水冷散熱系統端認證消息見報，股價直接噴上3725天價。利多已充分反映，籌碼在此極度擁擠，空手切勿追高，持股者拉高分批停利。"
     },
     {
         "symbol": "2485",
@@ -2267,8 +2269,8 @@ window.STOCK_DATA = [
         "analysis": "太空衛星利多持續湧現！兆赫股價開高後亮燈 超過2.2萬人排隊等入場 - Yahoo股市",
         "ai_insight": "【智能點評】盤面情緒沸騰！受大盤或新聞「太空衛星利多持續湧現！兆赫股價...」激勵，短線量能放大，請留意追高風險與前高壓力。",
         "foreign_flow": "主力點火",
-        "strategy_today": "強勢鎖標",
-        "strategy_tomorrow": "持股待漲",
+        "strategy_today": "題材點火",
+        "strategy_tomorrow": "提防出貨",
         "resistance": 75.0,
         "stop_loss": 71.25,
         "risk_warning": "【科學預警】新聞熱度已達心理巔峰，利多出盡機率高。",
@@ -3719,7 +3721,8 @@ window.STOCK_DATA = [
             "open": 71.5,
             "high": 75.0,
             "low": 71.5
-        }
+        },
+        "ai_insight_text": "【AI 大師研報】黃仁勳談及太空資料中心，低軌衛星概念立馬遭點火，75元鎖漲停。此為純題材炒作，基本面尚待驗證，需嚴防隔日沖倒貨。"
     },
     {
         "symbol": "2337",
@@ -3729,8 +3732,8 @@ window.STOCK_DATA = [
         "analysis": "半導體股紅通通！訊芯-KY等5檔噴漲停、旺宏創天價挑戰第3根 穎崴「超額配息」大漲7% - Yahoo股市",
         "ai_insight": "【智能點評】盤面情緒沸騰！受大盤或新聞「半導體股紅通通！訊芯-KY等5...」激勵，短線量能放大，請留意追高風險與前高壓力。",
         "foreign_flow": "主力點火",
-        "strategy_today": "強勢鎖標",
-        "strategy_tomorrow": "持股待漲",
+        "strategy_today": "強勢鎖碼",
+        "strategy_tomorrow": "沿線死抱",
         "resistance": 120.5,
         "stop_loss": 113.05,
         "risk_warning": "【科學預警】新聞熱度已達心理巔峰，利多出盡機率高。",
@@ -5196,7 +5199,8 @@ window.STOCK_DATA = [
             "open": 130.5,
             "high": 130.5,
             "low": 130.5
-        }
+        },
+        "ai_insight_text": "【AI 大師研報】記憶體族群強勢表態，強拉第三根漲停。底部起漲型態極度漂亮，主力鎖碼跡象明顯。只要不爆出巨量長黑，沿五日線死抱。"
     },
     {
         "symbol": "1711",
@@ -5206,8 +5210,8 @@ window.STOCK_DATA = [
         "analysis": "台積資本支出增 永光、上品沾光 - Yahoo股市",
         "ai_insight": "【智能點評】盤面情緒沸騰！受大盤或新聞「台積資本支出增 永光、上品沾光...」激勵，短線量能放大，請留意追高風險與前高壓力。",
         "foreign_flow": "主力點火",
-        "strategy_today": "強勢鎖標",
-        "strategy_tomorrow": "持股待漲",
+        "strategy_today": "極度狂熱",
+        "strategy_tomorrow": "隨時停利",
         "resistance": 39.05,
         "stop_loss": 37.1,
         "risk_warning": "【科學預警】新聞熱度已達心理巔峰，利多出盡機率高。",
@@ -6648,7 +6652,8 @@ window.STOCK_DATA = [
             "open": 37.1,
             "high": 39.05,
             "low": 36.1
-        }
+        },
+        "ai_insight_text": "【AI 大師研報】特化族群連續第三根漲停創15年高。短線乖離過大已達極度狂熱區，週轉率若突然拉高就是主力撤退信號，隨時準備獲利放口袋。"
     },
     {
         "symbol": "2421",
@@ -6658,8 +6663,8 @@ window.STOCK_DATA = [
         "analysis": "建準 公告本公司114年現金增資收足股款暨增資基準日 - Yahoo股市",
         "ai_insight": "【智能點評】盤面情緒沸騰！受大盤或新聞「建準 公告本公司114年現金增...」激勵，短線量能放大，請留意追高風險與前高壓力。",
         "foreign_flow": "主力點火",
-        "strategy_today": "強勢鎖標",
-        "strategy_tomorrow": "持股待漲",
+        "strategy_today": "事件驅動",
+        "strategy_tomorrow": "短進短出",
         "resistance": 160.5,
         "stop_loss": 147.72,
         "risk_warning": "【科學預警】新聞熱度已達心理巔峰，利多出盡機率高。",
@@ -8125,7 +8130,8 @@ window.STOCK_DATA = [
             "open": 153.5,
             "high": 160.5,
             "low": 148.5
-        }
+        },
+        "ai_insight_text": "【AI 大師研報】拿到NASA太空認證，跟上GTC宇宙話題，直接亮燈漲停。此種事件驅動型漲停最容易伴隨急拉急洗，手腳要快，勿做中期抱股幻想。"
     },
     {
         "symbol": "4906",
@@ -8135,8 +8141,8 @@ window.STOCK_DATA = [
         "analysis": "〈焦點股〉正文光通訊、AI SOM雙引擎點火 轉型效應浮現連飆2根漲停 - Yahoo股市",
         "ai_insight": "【智能點評】盤面情緒沸騰！受大盤或新聞「〈焦點股〉正文光通訊、AI S...」激勵，短線量能放大，請留意追高風險與前高壓力。",
         "foreign_flow": "主力點火",
-        "strategy_today": "強勢鎖標",
-        "strategy_tomorrow": "持股待漲",
+        "strategy_today": "底部突破",
+        "strategy_tomorrow": "拉回找點",
         "resistance": 31.6,
         "stop_loss": 30.02,
         "risk_warning": "【科學預警】新聞熱度已達心理巔峰，利多出盡機率高。",
@@ -9542,7 +9548,8 @@ window.STOCK_DATA = [
             "open": 31.55,
             "high": 31.6,
             "low": 30.7
-        }
+        },
+        "ai_insight_text": "【AI 大師研報】受惠網通/低軌/AI SOM模組佈局，突破盤整區放量攻上漲停。底部型態完成，為近期少數具備紮實題材的標的，拉回平盤均可視為進場點。"
     },
     {
         "symbol": "5274",
@@ -9552,8 +9559,8 @@ window.STOCK_DATA = [
         "analysis": "信驊盤中亮燈漲停 攻上11,310 元新天價 - MSN",
         "ai_insight": "【智能點評】盤面情緒沸騰！受大盤或新聞「信驊盤中亮燈漲停 攻上11,3...」激勵，短線量能放大，請留意追高風險與前高壓力。",
         "foreign_flow": "主力點火",
-        "strategy_today": "回檔佈局",
-        "strategy_tomorrow": "持股待漲",
+        "strategy_today": "股王發威",
+        "strategy_tomorrow": "觀望指標",
         "resistance": 11320.0,
         "stop_loss": 10754.0,
         "risk_warning": "",
@@ -10259,7 +10266,8 @@ window.STOCK_DATA = [
             "open": 10800.0,
             "high": 11320.0,
             "low": 10755.0
-        }
+        },
+        "ai_insight_text": "【AI 大師研報】股王再創新天價11320元。此處為外資與大戶深水區，股本小波動極大，非一般投資人能輕易參與，建議單純作為伺服器族群的情緒指標觀望即可。"
     },
     {
         "symbol": "3324",
@@ -10269,8 +10277,8 @@ window.STOCK_DATA = [
         "analysis": "【公告】雙鴻受邀參加 Bank of America 2026 Asia Tech Conference - Yahoo股市",
         "ai_insight": "【智能點評】盤面情緒沸騰！受大盤或新聞「【公告】雙鴻受邀參加 Bank...」激勵，短線量能放大，請留意追高風險與前高壓力。",
         "foreign_flow": "主力點火",
-        "strategy_today": "回檔佈局",
-        "strategy_tomorrow": "持股待漲",
+        "strategy_today": "高檔震盪",
+        "strategy_tomorrow": "靜待表態",
         "resistance": 1200.0,
         "stop_loss": 997.5,
         "risk_warning": "",
@@ -11611,7 +11619,8 @@ window.STOCK_DATA = [
             "open": 1070.0,
             "high": 1095.0,
             "low": 1045.0
-        }
+        },
+        "ai_insight_text": "【AI 大師研報】散熱族群今日健策獨秀，雙鴻反而位居高檔震盪、微漲作收。顯示上方解套賣壓與獲利了結盤正處交戰，需觀察能否守住十日線。"
     },
     {
         "symbol": "3481",
@@ -11621,8 +11630,8 @@ window.STOCK_DATA = [
         "analysis": "面板反攻、記憶體狂漲！群創炸60萬天量登人氣王 30元魔咒再發威 - Yahoo股市",
         "ai_insight": "【智能點評】盤面情緒沸騰！受大盤或新聞「面板反攻、記憶體狂漲！群創炸6...」激勵，短線量能放大，請留意追高風險與前高壓力。",
         "foreign_flow": "主力點火",
-        "strategy_today": "回檔佈局",
-        "strategy_tomorrow": "持股待漲",
+        "strategy_today": "天量震盪",
+        "strategy_tomorrow": "嚴設停損",
         "resistance": 33.3,
         "stop_loss": 26.32,
         "risk_warning": "",
@@ -13088,6 +13097,7 @@ window.STOCK_DATA = [
             "open": 27.9,
             "high": 29.4,
             "low": 27.55
-        }
+        },
+        "ai_insight_text": "【AI 大師研報】爆出60多萬張歷史天量，面板級封裝轉型題材大熱。但天量代表當沖極度盛行，籌碼極度混亂，極容易開高走低，嚴設停損點是唯一存活法則。"
     }
 ];
