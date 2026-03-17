@@ -35,17 +35,16 @@
 
         .sidebar {
             background: rgba(0, 0, 0, 0.3);
-            height: 100vh;
         }
     </style>
 </head>
 
 <body class="min-h-screen">
-    <div class="flex">
+    <div class="flex flex-col lg:flex-row min-h-screen">
         <!-- Sidebar -->
-        <div class="w-80 sidebar p-8 border-r border-gray-800">
+        <div class="w-full lg:w-80 sidebar p-4 lg:p-8 border-b lg:border-b-0 lg:border-r border-gray-800 lg:overflow-y-auto lg:h-screen shrink-0 relative z-10">
             <h1
-                class="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                class="text-2xl md:text-3xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
                 投機獵手 V2.0
             </h1>
             <div class="text-xs text-gray-500 mb-10 tracking-widest uppercase">
@@ -59,7 +58,7 @@
         </div>
 
         <!-- Main Content -->
-        <div class="flex-1 p-10 overflow-y-auto h-screen">
+        <div class="flex-1 p-4 md:p-10 w-full" id="main-content">
             <div id="welcome-screen" class="h-full flex flex-col justify-center items-center text-center">
                 <div
                     class="w-24 h-24 mb-6 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
@@ -76,13 +75,13 @@
                 <header class="flex justify-between items-start mb-6">
                     <div>
                         <p id="detail-symbol" class="text-blue-400 font-mono text-sm tracking-widest mb-1"></p>
-                        <div class="flex items-center gap-4">
-                            <h2 id="detail-name" class="text-4xl font-bold"></h2>
-                            <a id="cnyes-link" href="#" target="_blank" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 transition-all group shadow-sm">
+                        <div class="flex flex-wrap items-center gap-2 md:gap-4">
+                            <h2 id="detail-name" class="text-3xl md:text-4xl font-bold"></h2>
+                            <a id="cnyes-link" href="#" target="_blank" class="flex items-center gap-1.5 px-3 py-1 mt-1 rounded-full bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20 transition-all group shadow-sm">
                                 <img src="https://news.cnyes.com/favicon.ico" alt="cnyes" class="w-4 h-4 rounded-full group-hover:scale-110 transition-transform" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2965/2965306.png'">
                                 <span class="text-[10px] text-blue-300 font-bold tracking-wider">鉅亨分析</span>
                             </a>
-                            <span id="refresh-timer" class="text-[10px] text-green-400 font-mono border border-green-500/30 px-2 py-0.5 rounded-full animate-pulse transition-opacity">5S 後靜默刷新</span>
+                            <span id="refresh-timer" class="text-[10px] text-green-400 font-mono border border-green-500/30 px-2 py-0.5 mt-1 rounded-full animate-pulse transition-opacity">5S 後靜默刷新</span>
                         </div>
                         <div class="flex gap-4 mt-2">
                             <div class="glass-card px-3 py-1 text-xs">
@@ -96,18 +95,19 @@
                     </div>
                 </header>
 
-                <div class="grid grid-cols-3 gap-6">
-                    <main class="col-span-2">
-                        <div class="flex justify-between items-end mb-4">
-                            <div class="flex gap-4">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <main class="col-span-1 lg:col-span-2 overflow-hidden">
+                        <div class="flex flex-col xl:flex-row justify-between items-start xl:items-end mb-4 gap-4">
+                            <div class="flex flex-wrap gap-2 md:gap-4 shrink-0">
                                 <button onclick="switchChartView('history')" id="btn-history" class="px-4 py-2 rounded-lg bg-blue-500/20 border border-blue-500/50 text-blue-400 text-sm font-bold transition-all">14 天趨勢</button>
                                 <button onclick="switchChartView('intraday')" id="btn-intraday" class="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 text-sm font-bold hover:bg-white/10 transition-all">當日分時(量價)</button>
                             </div>
 
                             <!-- 即時報價面板 -->
-                            <div id="quote-panel" class="flex gap-4 bg-indigo-500/10 backdrop-blur-md rounded-xl px-4 py-2 border border-indigo-500/30 hidden">
-                                <div class="text-center px-2">
-                                    <p class="text-[11px] text-gray-400 uppercase">昨收</p>
+                            <div id="quote-panel" class="w-full overflow-x-auto pb-2 hidden">
+                                <div class="flex gap-4 bg-indigo-500/10 backdrop-blur-md rounded-xl px-4 py-2 border border-indigo-500/30 w-max shrink-0">
+                                    <div class="text-center px-2">
+                                        <p class="text-[11px] text-gray-400 uppercase">昨收</p>
                                     <p id="q-prev-close" class="text-xl font-bold text-gray-300 mt-1">--</p>
                                 </div>
                                 <div class="w-px h-10 bg-white/20 self-center"></div>
@@ -129,6 +129,7 @@
                                 <div class="text-center bg-white/5 px-4 py-1 rounded-lg flex flex-col justify-center border border-white/10">
                                     <p class="text-[11px] text-gray-400 uppercase">漲跌</p>
                                     <p id="q-change" class="text-xl font-bold mt-1">--</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -366,6 +367,9 @@
             localStorage.setItem('activeSymbol', activeSymbol);
             updateUIDisplay(idx);
             renderList(); // 重繪列表展現選取效果
+            if (window.innerWidth < 1024) {
+                document.getElementById('main-content').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
 
         function switchChartView(v) {
