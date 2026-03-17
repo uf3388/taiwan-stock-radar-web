@@ -36,6 +36,32 @@
         .sidebar {
             background: rgba(0, 0, 0, 0.3);
         }
+
+        /* 自定義捲軸樣式 - 讓畫面更精緻 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(66, 153, 225, 0.3);
+        }
+
+        /* 移除 Firefox 預設樣式 */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.1) rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 
