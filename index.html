@@ -242,11 +242,27 @@
     <script src="dashboard_data.js"></script>
     <script>
         let stockData = [];
+        let aiInsights = {}; // 新增 AI 洞察存儲
         let activeSymbol = null;
         let currentView = 'history';
 
+        async function loadAIInsights() {
+            try {
+                const response = await fetch(`ai_insights.json?ts=${new Date().getTime()}`);
+                if (response.ok) {
+                    aiInsights = await response.json();
+                    console.log("AI 洞察加載完成");
+                }
+            } catch (e) {
+                console.warn("AI 洞察尚未生成或加載失敗", e);
+            }
+        }
+
         async function loadData() {
             try {
+                // 先嘗試加載 AI 洞察
+                await loadAIInsights();
+                
                 if (window.STOCK_DATA) {
                     stockData = window.STOCK_DATA;
                     renderList();
@@ -255,7 +271,7 @@
                     
                     if (activeSymbol) {
                         const index = stockData.findIndex(s => s.symbol === activeSymbol);
-                        if (index !== -1) showDetail(index);
+                        if (index !== -1) updateUIDisplay(index);
                     }
                 }
             } catch (e) {
@@ -277,6 +293,7 @@
 
         async function loadData() {
             try {
+                await loadAIInsights();
                 if (window.STOCK_DATA) {
                     stockData = window.STOCK_DATA;
                     if (window.LAST_UPDATE) {
@@ -291,7 +308,6 @@
                     if (activeSymbol) {
                         const index = stockData.findIndex(s => s.symbol === activeSymbol);
                         if (index !== -1) {
-                            // 這裡調用一個特殊的更新函數，而不是完整的 showDetail，避免 UI 抖動
                             updateUIDisplay(index);
                         }
                     }
@@ -323,6 +339,13 @@
         // 核心更新邏輯：只更新數值與圖表資料，不移動 UI
         function updateUIDisplay(idx) {
             const s = stockData[idx];
+            // 從外部 AI 洞察中獲取資料，若無則回退至 STOCK_DATA (相容舊版) 或預設值
+            const insight = aiInsights[s.symbol] || {
+                insight: s.ai_insight_text || s.ai_insight || '--',
+                st_today: s.strategy_today || '--',
+                st_tmr: s.strategy_tomorrow || '--'
+            };
+
             document.getElementById('welcome-screen').classList.add('hidden');
             document.getElementById('detail-view').classList.remove('hidden');
             document.getElementById('detail-name').innerText = `${s.name} (${s.symbol})`;
@@ -331,11 +354,11 @@
             document.getElementById('detail-analysis').innerText = s.analysis;
             
             const insightEl = document.getElementById('detail-ai-insight');
-            if (insightEl) insightEl.innerText = s.ai_insight || '--';
+            if (insightEl) insightEl.innerText = insight.insight;
             
             document.getElementById('inst-foreign').innerText = s.foreign_flow;
-            document.getElementById('strategy-today').innerText = s.strategy_today;
-            document.getElementById('strategy-tomorrow').innerText = s.strategy_tomorrow;
+            document.getElementById('strategy-today').innerText = insight.st_today;
+            document.getElementById('strategy-tomorrow').innerText = insight.st_tmr;
             
             // 更新今日概況
             if (s.quote_info) {
