@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>台股雷達 2.0 | FinMind 智能核心</title>
+    <!-- 增加快取清除機制 -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-deep: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
+            --bg-deep: #020617;
+            --card-bg: rgba(30, 41, 59, 0.5);
             --accent-blue: #38bdf8;
             --accent-green: #4ade80;
             --accent-red: #fb7185;
@@ -22,180 +23,157 @@
             font-family: 'Outfit', 'Noto Sans TC', sans-serif;
             background: var(--bg-deep);
             color: var(--text-primary);
-            overflow-x: hidden;
-            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            background: radial-gradient(circle at top right, #1e1b4b, #020617);
             min-height: 100vh;
+            padding: 2rem 1rem;
         }
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .container { max-width: 1300px; margin: 0 auto; }
 
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 3rem;
-            animation: fadeInDown 0.8s ease-out;
+            text-align: center;
+            margin-bottom: 4rem;
         }
 
-        .logo {
-            font-size: 2rem;
-            font-weight: 600;
-            background: linear-gradient(90deg, #38bdf8, #818cf8);
+        .logo-text {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            margin-bottom: 0.5rem;
         }
 
-        .last-update {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            background: rgba(255,255,255,0.05);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            border: 1px border rgba(255,255,255,0.1);
+        .update-tag {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent-blue);
+            padding: 0.4rem 1.2rem;
+            border-radius: 99px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(56, 189, 248, 0.2);
         }
 
-        /* 榜單網格 */
-        .ranking-grid {
+        .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
         }
 
-        .stock-card {
+        .card {
             background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            padding: 1.5rem;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
-            overflow: hidden;
         }
 
-        .stock-card:hover {
-            transform: translateY(-8px);
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
             border-color: var(--accent-blue);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            background: rgba(30, 41, 59, 0.8);
         }
 
-        .card-header {
+        .card-head {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
         }
 
-        .symbol-box {
-            display: flex;
-            flex-direction: column;
+        .symbol { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 4px; display: block; }
+        .name { font-size: 1.6rem; font-weight: 700; }
+        .score { 
+            font-size: 1.2rem; font-weight: 700; 
+            color: var(--accent-blue); 
+            background: rgba(56, 189, 248, 0.1);
+            width: 50px; height: 50px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 14px;
         }
 
-        .stock-symbol { font-size: 0.8rem; color: var(--text-secondary); font-weight: 300; }
-        .stock-name { font-size: 1.4rem; font-weight: 600; margin-top: 2px; }
-
-        .score-badge {
-            background: linear-gradient(135deg, #38bdf8, #1d4ed8);
-            padding: 0.4rem 0.8rem;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .price-section {
+        .price-row {
             display: flex;
             align-items: baseline;
-            gap: 10px;
-            margin-bottom: 1rem;
+            gap: 12px;
+            margin-bottom: 1.5rem;
         }
 
-        .current-price { font-size: 2rem; font-weight: 600; }
-        .price-change { font-size: 0.9rem; font-weight: 400; }
+        .price { font-size: 2.2rem; font-weight: 600; }
+        .change { font-weight: 500; }
         .up { color: var(--accent-red); }
         .down { color: var(--accent-green); }
 
-        .insight-box {
-            background: rgba(0,0,0,0.2);
-            padding: 1rem;
-            border-radius: 12px;
-            font-size: 0.9rem;
+        .ai-analysis {
+            font-size: 0.95rem;
             line-height: 1.6;
-            color: #cbd5e1;
-            border-left: 3px solid var(--accent-blue);
+            color: var(--text-secondary);
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
         }
 
-        /* 動畫 */
-        @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* 響應式 */
-        @media (max-width: 768px) {
-            .container { padding: 1rem; }
-            .ranking-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="logo">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="#38BDF8"/>
-                </svg>
-                TW Stock Radar 2.0
-            </div>
-            <div class="last-update" id="last-update">等待數據載入...</div>
+            <h1 class="logo-text">DYNAMIC RADAR 2.0</h1>
+            <div class="update-tag" id="update-time">數據準備中...</div>
         </header>
 
-        <main class="ranking-grid" id="main-content">
-            <!-- 數據會在此動態生成 -->
-        </main>
+        <div class="grid" id="stock-grid">
+            <!-- 動態內容 -->
+        </div>
     </div>
 
-    <script src="dashboard_data.js"></script>
+    <!-- 強制不使用快取載入數據 -->
     <script>
-        function renderDashboard() {
-            const container = document.getElementById('main-content');
-            const updateTime = document.getElementById('last-update');
+        document.write('<script src="dashboard_data.js?v=' + Date.now() + '"><\/script>');
+    </script>
+    
+    <script>
+        function render() {
+            const grid = document.getElementById('stock-grid');
+            const timeTag = document.getElementById('update-time');
             
-            if (typeof window.STOCK_DATA === 'undefined') {
-                container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 4rem;">目前尚無數據，請執行分析腳本。</div>';
+            if (!window.STOCK_DATA) {
+                grid.innerHTML = "數據加載失敗，請檢查 dashboard_data.js";
                 return;
             }
 
-            updateTime.innerText = `最後更新：${window.LAST_UPDATE || 'N/A'}`;
+            timeTag.innerText = `市場最後同步時間：${window.LAST_UPDATE}`;
             
-            container.innerHTML = window.STOCK_DATA.map((stock, index) => {
-                const isUp = !stock.change.includes('-');
-                const colorClass = isUp ? 'up' : 'down';
-                const prefix = isUp ? '▲' : '▼';
+            grid.innerHTML = window.STOCK_DATA.map((s, i) => {
+                const isUp = !s.change.includes('-');
+                const color = isUp ? 'up' : 'down';
+                const icon = isUp ? '▲' : '▼';
 
                 return `
-                    <article class="stock-card" style="animation: fadeInUp 0.5s ease-out ${index * 0.1}s both;">
-                        <div class="card-header">
-                            <div class="symbol-box">
-                                <span class="stock-symbol">${stock.symbol}</span>
-                                <span class="stock-name">${stock.name}</span>
-                            </div>
-                            <div class="score-badge">熱度 ${stock.score}</div>
+                <div class="card" style="animation: fadeInUp 0.6s ease-out ${i * 0.1}s both">
+                    <div class="card-head">
+                        <div>
+                            <span class="symbol">${s.symbol}</span>
+                            <span class="name">${s.name}</span>
                         </div>
-                        <div class="price-section">
-                            <span class="current-price">${stock.price}</span>
-                            <span class="price-change ${colorClass}">${prefix} ${stock.change} (${stock.pct})</span>
-                        </div>
-                        <div class="insight-box">
-                            ${stock.insight || 'AI 正正在分析該個股動態...'}
-                        </div>
-                    </article>
+                        <div class="score">${s.score}</div>
+                    </div>
+                    <div class="price-row">
+                        <span class="price">${s.price}</span>
+                        <span class="change ${color}">${icon}${s.change} (${s.pct})</span>
+                    </div>
+                    <div class="ai-analysis">${s.insight}</div>
+                </div>
                 `;
             }).join('');
         }
-
-        window.onload = renderDashboard;
+        window.onload = render;
     </script>
 </body>
 </html>
